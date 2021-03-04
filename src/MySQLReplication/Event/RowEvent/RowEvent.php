@@ -629,40 +629,46 @@ class RowEvent extends EventCommon
         $compFractional = $columnDTO->getDecimals() - ($unCompFractional * $digitsPerInteger);
 
         $value = $this->binaryDataReader->readUInt8();
+        $integral = '';
+        $fractional = '';
         if (0 !== ($value & 0x80)) {
             $mask = 0;
-            $res = '';
+            $sign = '';
         } else {
             $mask = -1;
-            $res = '-';
+            $sign = '-';
         }
         $this->binaryDataReader->unread(pack('C', $value ^ 0x80));
 
         $size = $compressedBytes[$compIntegral];
         if ($size > 0) {
             $value = $this->binaryDataReader->readIntBeBySize($size) ^ $mask;
-            $res .= $value;
+            $integral .= $value;
         }
 
         for ($i = 0; $i < $unCompIntegral; ++$i) {
             $value = $this->binaryDataReader->readInt32Be() ^ $mask;
-            $res .= sprintf('%09d', $value);
+            $integral .= sprintf('%09d', $value);
         }
-
-        $res .= '.';
 
         for ($i = 0; $i < $unCompFractional; ++$i) {
             $value = $this->binaryDataReader->readInt32Be() ^ $mask;
-            $res .= sprintf('%09d', $value);
+            $fractional .= sprintf('%09d', $value);
         }
 
         $size = $compressedBytes[$compFractional];
         if ($size > 0) {
             $value = $this->binaryDataReader->readIntBeBySize($size) ^ $mask;
-            $res .= sprintf('%0' . $compFractional . 'd', $value);
+            $fractional .= sprintf('%0' . $compFractional . 'd', $value);
         }
 
-        return bcmul($res, '1', $columnDTO->getDecimals());
+        // There can be trailing zeroes. They are not signifiant, but we work
+        // with numbers in strings to retain precision (like bcmath) so as a string,
+        // "1.1" is not the same as "1.10".
+        // We handle this case
+        $integral = ltrim($integral,'0');
+        $fractional = rtrim($fractional, '0');
+        return rtrim($sign.$integral.'.'.$fractional, '.');
     }
 
     protected function getDatetime(): ?string

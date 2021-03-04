@@ -34,7 +34,7 @@ class TypesTest extends BaseTest
 
         $event = $this->createAndInsertValue($create_query, $insert_query);
 
-        self::assertSame($expect = '9000000123.1234560000', $value = $event->getValues()[0]['test']);
+        self::assertSame($expect = '9000000123.123456', $value = $event->getValues()[0]['test']);
         self::assertSame(strlen($expect), strlen($value));
     }
 
@@ -61,9 +61,9 @@ class TypesTest extends BaseTest
 
         $event = $this->createAndInsertValue($create_query, $insert_query);
 
-        self::assertEquals('-42000.1234560000', $event->getValues()[0]['test']);
+        self::assertEquals('-42000.123456', $event->getValues()[0]['test']);
         self::assertEquals('-51.1234', $event->getValues()[0]['test2']);
-        self::assertEquals('-51.123456789098765432123456789000', $event->getValues()[0]['test3']);
+        self::assertEquals('-51.123456789098765432123456789', $event->getValues()[0]['test3']);
     }
 
     /**
@@ -77,7 +77,7 @@ class TypesTest extends BaseTest
         $event = $this->createAndInsertValue($create_query, $insert_query);
 
         self::assertEquals('4.2', $event->getValues()[0]['test']);
-        self::assertEquals('42000.1234560000', $event->getValues()[0]['test2']);
+        self::assertEquals('42000.123456', $event->getValues()[0]['test2']);
     }
 
     /**
